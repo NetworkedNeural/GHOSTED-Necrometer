@@ -1,0 +1,337 @@
+:root {
+  --glitch-speed: 1.5s;
+  --waver-speed: 10s;
+  --waver-intensity: 1deg;
+  --aberration-offset: 1px;
+}
+
+.ar-container {
+  overflow: hidden;
+}
+
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(110, 231, 183, 0) 0%, var(--color-primary-400) 50%, rgba(110, 231, 183, 0) 100%);
+  box-shadow: 0 0 10px var(--color-primary-400);
+  animation: scan-anim 4s linear infinite;
+  z-index: 1;
+}
+
+@keyframes scan-anim {
+  0% { transform: translateX(-10px); }
+  100% { transform: translateX(calc(100vw - 2px)); }
+}
+
+.entity-glyph-container {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 15vmin;
+  height: 15vmin;
+  max-width: 80px;
+  max-height: 80px;
+  will-change: transform, filter, opacity, top, left;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-out;
+  animation: waver var(--waver-speed) infinite ease-in-out;
+}
+
+/* Make animations faster and more intense with higher distortion */
+.entity-glyph-container:not(.contained) {
+  --glitch-speed: calc(1.5s - (var(--distortion-level, 0) * 0.14s));
+  --waver-speed: calc(10s - (var(--distortion-level, 0) * 0.9s));
+  --waver-intensity: calc(1deg + (var(--distortion-level, 0) * 0.6deg));
+  --aberration-offset: calc(1px + (var(--distortion-level, 0) * 0.7px));
+}
+
+.entity-glyph-container.targeted:not(.contained) {
+  transform: translate(-50%, -50%) scale(1.15);
+  --waver-intensity: calc(2deg + (var(--distortion-level, 0) * 0.7deg));
+  --aberration-offset: calc(2px + (var(--distortion-level, 0) * 0.8px));
+}
+
+.entity-glyph-container.critical-glitch:not(.contained) {
+  animation: glitch-transform 0.8s cubic-bezier(.25,.46,.45,.94) both infinite, 
+             waver var(--waver-speed) infinite ease-in-out;
+}
+
+.entity-glyph {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 0 5px var(--color-primary-500));
+  opacity: 0.8;
+  transition: filter 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.entity-glyph-container.targeted:not(.contained) .entity-glyph {
+  animation: pulse-glow-targeted 1.2s infinite ease-in-out;
+}
+
+/* Interaction ripple effect */
+@keyframes ripple-effect {
+  from {
+    box-shadow: 0 0 0 0px rgba(52, 211, 153, 0.7);
+  }
+  to {
+    box-shadow: 0 0 0 20px rgba(52, 211, 153, 0);
+  }
+}
+.entity-glyph-container.interacting .entity-glyph {
+  /* The animation is short and runs once when the class is applied */
+  animation: ripple-effect 0.4s ease-out;
+}
+
+
+/* Chromatic Aberration Effect */
+.entity-glyph::before,
+.entity-glyph::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: inherit;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  mix-blend-mode: screen;
+  transition: transform 0.2s ease-out;
+  opacity: 0.9;
+}
+
+.entity-glyph::before {
+  background-color: red;
+  transform: translateX(var(--aberration-offset));
+}
+
+.entity-glyph::after {
+  background-color: cyan;
+  transform: translateX(calc(-1 * var(--aberration-offset)));
+}
+
+.entity-glyph-container.critical-glitch .entity-glyph::before {
+  animation: glitch var(--glitch-speed) infinite;
+}
+.entity-glyph-container.critical-glitch .entity-glyph::after {
+  animation: glitch var(--glitch-speed) reverse infinite;
+}
+
+
+.containment-field {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border: 2px solid rgba(59, 130, 246, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.7) inset, 0 0 10px rgba(59, 130, 246, 0.5);
+  animation: pulse-contain 3s infinite ease-in-out;
+}
+
+@keyframes pulse-contain {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+}
+
+.crosshair-hud {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary-400);
+}
+
+.crosshair-default, .crosshair-lock {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  transition: opacity 0.3s ease;
+  position: absolute;
+}
+
+.crosshair-lock {
+  color: #f87171;
+  animation: lock-on 0.3s ease-out forwards;
+}
+@keyframes lock-on {
+  from { transform: scale(1.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.target-info {
+  position: absolute;
+  bottom: -60px;
+  width: 200px;
+  text-align: center;
+  animation: info-fade-in 0.4s 0.1s ease-out forwards;
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+.target-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #f87171;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.target-instability {
+  margin-top: 4px;
+}
+
+.target-instability p {
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    color: #fca5a5;
+    margin-bottom: 2px;
+}
+
+.instability-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: 2px;
+    padding: 1px;
+}
+
+.instability-fill {
+    height: 100%;
+    background: #ef4444;
+    border-radius: 1px;
+    transition: width 0.3s ease;
+}
+
+@keyframes info-fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes waver {
+  0%, 100% { transform: translate(-50%, -50%) rotate(var(--waver-intensity)); }
+  50% { transform: translate(-50%, -50%) rotate(calc(-1 * var(--waver-intensity))); }
+}
+
+@keyframes glitch {
+  2%, 64% { transform: translate(var(--aberration-offset), 0); }
+  65% { transform: translate(calc(-1 * var(--aberration-offset)), 0); }
+}
+
+@keyframes pulse-glow-targeted {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(248, 113, 113, 1));
+  }
+}
+
+@keyframes glitch-transform {
+  0% { clip-path: inset(0 0 0 0); }
+  5% { clip-path: inset(10% 0 85% 0); }
+  10% { clip-path: inset(90% 0 1% 0); }
+  15% { clip-path: inset(30% 0 50% 0); }
+  20% { clip-path: inset(0 0 0 0); }
+  80% { clip-path: inset(0 0 0 0); }
+  85% { clip-path: inset(80% 0 5% 0); }
+  90% { clip-path: inset(5% 0 92% 0); }
+  95% { clip-path: inset(40% 0 40% 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+
+/* === Scene Analysis Styles === */
+.scene-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.scene-polyline {
+  fill: none;
+  stroke: var(--color-primary-400);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px var(--color-primary-400));
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-line 2.5s ease-out forwards, pulse-line 4s 2.5s infinite ease-in-out;
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-line {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.scan-button {
+  padding: 10px 20px;
+  background-color: rgba(6, 78, 59, 0.8); /* primary-900 */
+  color: var(--color-primary-300);
+  border: 1px solid var(--color-primary-600);
+  border-radius: 8px;
+  font-weight: bold;
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.scan-button:hover:not(:disabled) {
+  background-color: var(--color-primary-700);
+  color: white;
+  box-shadow: 0 0 15px var(--color-primary-500);
+}
+
+.scan-button:disabled {
+  background-color: rgba(55, 65, 81, 0.7);
+  color: rgb(156 163 175);
+  cursor: not-allowed;
+}
+
+.scan-error-toast {
+  background-color: rgba(127, 29, 29, 0.9);
+  color: rgb(252, 165, 165);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgb(153, 27, 27);
+  animation: fade-in-out 4s ease-in-out forwards;
+}
+
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0; transform: translateY(10px); }
+  10%, 90% { opacity: 1; transform: translateY(0); }
+}

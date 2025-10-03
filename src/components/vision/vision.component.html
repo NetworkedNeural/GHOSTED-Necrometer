@@ -1,0 +1,90 @@
+<div class="relative w-full h-full pointer-events-none ar-container">
+
+  <!-- Active Scanline Effect -->
+  <div class="scanline"></div>
+
+  <!-- Environmental Scan Overlay -->
+  <svg class="scene-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+    @for (object of sceneObjects(); track object.name) {
+      @for (polyline of object.polylines; track $index) {
+        <polyline 
+          [attr.points]="pointsToString(polyline)"
+          class="scene-polyline" 
+        />
+      }
+    }
+  </svg>
+
+  <!-- Entity Glyphs -->
+  @for(entity of arEntities(); track entity.id) {
+    <div 
+      class="entity-glyph-container"
+      [class.targeted]="entity.id === targetedEntity()?.id"
+      [class.contained]="entity.contained"
+      [class.critical-glitch]="distortionLevel() >= 9"
+      [class.interacting]="entity.isInteracting"
+      [style.--distortion-level]="distortionLevel()"
+      [style.left.%]="entity.x"
+      [style.top.%]="entity.y">
+        <div 
+            class="entity-glyph"
+            [style.background-image]="'url(data:image/png;base64,' + entity.glyphB64 + ')'"
+            [attr.aria-label]="'Glyph of ' + entity.name"
+        ></div>
+        @if(entity.contained) {
+            <div class="containment-field"></div>
+        }
+    </div>
+  }
+
+  <!-- Targeting Crosshair and HUD -->
+  <div class="crosshair-hud">
+    @if (targetedEntity(); as entity) {
+        <!-- Lock-on state -->
+        <svg class="crosshair-lock" viewBox="0 0 100 100">
+            <path d="M 30 10 L 10 10 L 10 30" />
+            <path d="M 70 10 L 90 10 L 90 30" />
+            <path d="M 30 90 L 10 90 L 10 70" />
+            <path d="M 70 90 L 90 90 L 90 70" />
+        </svg>
+        <div class="target-info">
+            <p class="target-name">{{ entity.name }}</p>
+            <div class="target-instability">
+                <p>INSTABILITY</p>
+                <div class="instability-bar">
+                    <div class="instability-fill" [style.width.%]="entity.instability"></div>
+                </div>
+            </div>
+        </div>
+    } @else {
+        <!-- Default state -->
+        <svg class="crosshair-default" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="4" />
+            <path d="M 50 20 L 50 35" />
+            <path d="M 50 80 L 50 65" />
+            <path d="M 20 50 L 35 50" />
+            <path d="M 80 50 L 65 50" />
+        </svg>
+    }
+  </div>
+
+  <!-- Environment Scan Controls -->
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-auto w-64 text-center">
+    @if (scanError()) {
+      <div class="scan-error-toast mb-2">
+        {{ scanError() }}
+      </div>
+    }
+    <button (click)="scanEnvironment()" [disabled]="isScanningEnvironment()" class="scan-button">
+      @if (isScanningEnvironment()) {
+        <span class="animate-pulse">Scanning Environment...</span>
+      } @else {
+        <div class="flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm11 2H6v6h8V7z" clip-rule="evenodd" /><path d="M11 3a1 1 0 10-2 0v1h2V3z" /></svg>
+          <span>Scan Environment ({{ scanCost }} NC)</span>
+        </div>
+      }
+    </button>
+  </div>
+
+</div>

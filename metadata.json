@@ -1,0 +1,8 @@
+{
+  "name": "Necrometer: Ghost Detector",
+  "description": "The ultimate tool for modern paranormal investigation. Use advanced scanner technology, AR vision, EVP recording, and AI analysis to detect, profile, and log spectral entities. Uncover temporal echoes from the past and fund your research with Necro-Credits. Do you dare to see what's on the other side?",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

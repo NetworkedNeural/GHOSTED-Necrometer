@@ -1,0 +1,41 @@
+html,
+body,
+app-root {
+  background-color: transparent !important;
+}
+
+:root {
+  --color-primary-300: #6ee7b7; /* green-300 */
+  --color-primary-400: #34d399; /* green-400 */
+  --color-primary-500: #10b981; /* green-500 */
+  --color-primary-600: #059669; /* green-600 */
+  --color-primary-700: #047857; /* green-700 */
+  --color-primary-800: #065f46; /* green-800 */
+  --color-primary-900: #064e3b; /* green-900 */
+}
+
+.pro-theme {
+  --color-primary-300: #fcd34d; /* amber-300 */
+  --color-primary-400: #fbbf24; /* amber-400 */
+  --color-primary-500: #f59e0b; /* amber-500 */
+  --color-primary-600: #d97706; /* amber-600 */
+  --color-primary-700: #b45309; /* amber-700 */
+  --color-primary-800: #92400e; /* amber-800 */
+  --color-primary-900: #78350f; /* amber-900 */
+}
+
+/* View transition animation */
+@keyframes view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-fade-in {
+  animation: view-fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}

@@ -1,0 +1,47 @@
+<div 
+  class="relative flex flex-col items-center justify-around h-full text-center p-2 rounded-lg bg-gray-800/20 border-2 border-[var(--color-primary-500)]/20 transition-all duration-300 pulsating-container"
+  [style]="scannerContainerStyles()">
+
+  <div class="absolute inset-0 distortion-overlay pointer-events-none" [style.opacity]="backgroundDistortionOpacity()"></div>
+
+  <div class="w-full max-w-xs space-y-4 z-10">
+    <!-- Status Display -->
+    <div>
+      <p class="text-sm text-gray-400 uppercase tracking-widest">System Status</p>
+      <p class="text-lg font-bold tracking-wider" [class]="statusColorClass()">{{ status() }}</p>
+    </div>
+
+    <!-- Main EMF Reading -->
+    <div class="relative w-full h-24 flex items-center justify-center">
+      <div class="scanline-overlay"></div>
+      <p class="font-mono text-6xl font-bold text-[var(--color-primary-300)] z-10 drop-shadow-[0_0_8px_rgba(110,231,183,0.8)]">
+        {{ deviceState.emfReading().toFixed(2) }}
+      </p>
+      <p class="absolute bottom-4 right-8 font-mono text-lg text-[var(--color-primary-500)] z-10">µT</p>
+    </div>
+
+    <!-- Energy Bar -->
+    <div class="w-full bg-gray-700/50 rounded-full h-4 border border-gray-600 overflow-hidden">
+      <div class="h-full rounded-full transition-all duration-150" 
+           [class]="barColorClass()" 
+           [style.width.%]="deviceState.emfReading()">
+      </div>
+    </div>
+    
+    <div class="flex gap-2 w-full">
+        <div class="flex-1">
+            <app-geo-triangulator [emfReading]="deviceState.emfReading()"></app-geo-triangulator>
+        </div>
+        <div class="flex-1">
+             <!-- Spectral Map -->
+            <app-spectral-map [emfReading]="deviceState.emfReading()"></app-spectral-map>
+        </div>
+    </div>
+   
+
+    <!-- Informational Text -->
+    <div class="text-gray-400 text-xs pt-2">
+      <p>Monitoring ambient electromagnetic fields for spectral variance.</p>
+    </div>
+  </div>
+</div>
